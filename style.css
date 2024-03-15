@@ -1,0 +1,26 @@
+#bar-graph-container {
+    margin-left: 20%;
+}
+
+.member {
+    margin: 15%;
+    position: absolute;
+    top: -5%;
+}
+
+.year {
+    position: fixed;
+    left: 32%;
+    top: 65%;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 999; 
+    pointer-events: none;
+}
