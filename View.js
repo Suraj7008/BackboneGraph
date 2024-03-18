@@ -10,18 +10,6 @@ var BarGraphModel = Backbone.Model.extend({
     }
 });
 
-var PieChartModel = Backbone.Model.extend({
-    defaults: {
-        // Define necessary attributes for pie chart data
-		PieGraphData: [
-			{'2020': '10 Member'},
-			{'2021': '20 Member'},
-			{'2020': '10 Member'},
-		],
-    }
-});
-
-
 var BarGraphView = Backbone.View.extend({
     el: '#bar-graph-container',
 
@@ -67,41 +55,46 @@ var BarGraphView = Backbone.View.extend({
         	.attr('height', function(d) { return height - yScale(Object.values(d)[0]); })
         	.attr('fill', 'steelblue')
         	.attr('aria-label', function(d, i) { return ( Object.values(d) + 'Member(s) in' + Object.keys(d));; })
-        	.attr('tabindex', '-1');
+        	.attr('tabindex', '-1')
 
-    		// Add event listeners for tooltips
-		bars.on('mouseenter focus', function(d, i) { // Show tooltip on mouse enter or focus
+        // Add event listeners for tooltips
+        bars.on('mouseenter focus', function(d, i) { // Show tooltip on mouse enter or focus
             let year = Object.keys(i)[0]; // Extract the year from the data object
             let members = Object.values(i)[0]; // Extract the number of members
             let tooltipText = members + ' Member(s) in ' + year; // Construct the tooltip text
-
+        
             // Remove existing tooltips
             d3.selectAll('.tooltip').remove();
-
+        
             // Append new tooltip to the SVG element
             let tooltip = svg.append('text')
                 .attr('class', 'tooltip')
                 .attr('text-anchor', 'middle')
                 .text(tooltipText);
-
+        
             // Calculate tooltip position relative to bar position
             let barX = parseFloat(d3.select(this).attr('x'));
             let barWidth = parseFloat(d3.select(this).attr('width'));
             let barY = parseFloat(d3.select(this).attr('y'));
             let tooltipWidth = tooltip.node().getBBox().width;
             let tooltipHeight = tooltip.node().getBBox().height;
-
+        
             let tooltipX = barX + barWidth / 2 - tooltipWidth / 2;
             let tooltipY = barY - tooltipHeight - 5;
-
-        // Set tooltip position
-        tooltip.attr('x', tooltipX)
-               .attr('y', tooltipY);
+        
+            // Set tooltip position
+            tooltip.attr('x', tooltipX)
+                .attr('y', tooltipY);
+        
+            // Add aria-expanded attribute to the bar
+            d3.select(this).attr('aria-expanded', 'true');
         })
         .on('mouseleave blur', function() { // Hide tooltip on mouse leave or blur (when focus is lost)
             d3.selectAll('.tooltip').remove();
+        
+            // Remove aria-expanded attribute from the bar
+            d3.select(this).attr('aria-expanded', 'false');
         })
-
         .on('focus', function(d, i) { // Show tooltip on focus
             let year = Object.keys(i)[0]; // Extract the year from the data object
             let members = Object.values(i)[0]; // Extract the number of members
@@ -121,11 +114,18 @@ var BarGraphView = Backbone.View.extend({
             // Set tooltip position relative to bar position
             tooltip.style('left', (parseFloat(d3.select(this).attr('x')) + parseFloat(d3.select(this).attr('width')) / 2 + 10) + 'px')
                 .style('top', (parseFloat(d3.select(this).attr('y')) - 10) + 'px');
-            })
-            
-            .on('blur', function() { // Hide tooltip on blur (when focus is lost)
-                d3.selectAll('.tooltip').remove();
-            });
+        
+            // Add aria-expanded attribute to the bar
+            d3.select(this).attr('aria-expanded', 'true');
+        })
+        .on('blur', function() { // Hide tooltip on blur (when focus is lost)
+            d3.selectAll('.tooltip').remove();
+        
+            // Remove aria-expanded attribute from the bar
+            d3.select(this).attr('aria-expanded', 'false');
+        });
+
+
 
 
         // Add labels for each bar
@@ -162,70 +162,8 @@ var BarGraphView = Backbone.View.extend({
 });
 
 
-
-//Pie Chart
-var PieChartView = Backbone.View.extend({
-    el: '#pie-chart-container', // Assuming you have a container element in your HTML
-
-    initialize: function() {
-        this.model = new PieChartModel(); // Instantiate your model
-        this.render();
-    },
-
-//     render: function() {
-//         let data = this.model.get("PieGraphData");
-// 		let width = 400;
-// 		let height = 200;
-// 		let radius = Math.min(width, height) / 2;
-// 		// console.log(radius)
-
-// 		let svg = d3.select(this.el).append('svg')
-// 			.attr('width', width)
-// 			.attr('height', height)
-//            	.append('g')
-//             .attr('transform', 'translate(' + (width / 2) +',' + (height / 2) + ')')
-// 			.attr('tabindex', '0')
-// 			.attr('aria-lable', 'Pie Chart represent the number of members per year');
-
-// 		let pie = d3.pie()
-//          	.value(function(d) { return parseInt(Object.values(d)[0]); });
-
-// 		let path = d3.arc()
-//             .outerRadius(radius - 10)
-//             .innerRadius(0);
-
-// 		let arc = svg.selectAll("arc")
-//             .data(pie(data))
-//             .enter()
-//             .append("g")
-// 			.attr('tabindex', '0')
-
-// 		arc.append("path")
-//             .attr("d", path)
-//             .attr("fill", function(d, i) {
-//                 return d3.schemeCategory10[i];
-//         });
-
-// 		arc.append("text")
-//             .attr("transform", function(d) {
-//                 return "translate(" + path.centroid(d) + ")";
-//         	})
-//             .attr("text-anchor", "middle")
-//             .text(function(d) {
-//                 return Object.keys(d.data)[0];
-//             });
-	
-// 	}
-});	
-
-// $(document).ready(function() {
-//     var barGraphView = new BarGraphView();
-//     var pieChartView = new PieChartView();
-// });
-
 $(document).ready(function() {
     var barGraphView = new BarGraphView();
-    var pieChartView = new PieChartView();
 
     $(document).keydown(function(event) {
         if (event.key === 'Escape') {
